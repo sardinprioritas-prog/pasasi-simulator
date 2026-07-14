@@ -54,7 +54,7 @@ const DB = (() => {
   return {
     // Seed flag
     isSeeded: async () => {
-      const { data, error } = await supabase.from(KEYS.SYSTEM).select('seeded').eq('id', 'seed_status').single();
+      const { data, error } = await supabase.from(KEYS.SYSTEM).select('seeded').eq('id', 'seed_status').maybeSingle();
       return data ? data.seeded : false;
     },
     markSeeded: async () => {
@@ -76,7 +76,7 @@ const DB = (() => {
       return data || [];
     },
     getFlight: async (id) => {
-      const { data } = await supabase.from(KEYS.FLIGHTS).select('*').eq('id', id).single();
+      const { data } = await supabase.from(KEYS.FLIGHTS).select('*').eq('id', id).maybeSingle();
       return data;
     },
     saveFlight: async (flight) => {
@@ -98,7 +98,7 @@ const DB = (() => {
       return data || [];
     },
     getPassenger: async (id) => {
-      const { data } = await supabase.from(KEYS.PASSENGERS).select('*').eq('id', id).single();
+      const { data } = await supabase.from(KEYS.PASSENGERS).select('*').eq('id', id).maybeSingle();
       return data;
     },
     getFlightPassengers: async (fid) => {
@@ -142,7 +142,7 @@ const DB = (() => {
       return data || [];
     },
     getAgent: async (id) => {
-      const { data } = await supabase.from(KEYS.AGENTS).select('*').eq('id', id).single();
+      const { data } = await supabase.from(KEYS.AGENTS).select('*').eq('id', id).maybeSingle();
       return data;
     },
     getAgentByCredentials: async (agentId, password) => {
@@ -151,7 +151,7 @@ const DB = (() => {
         .eq('agentId', agentId.toUpperCase())
         .eq('password', password)
         .limit(1)
-        .single();
+        .maybeSingle();
       return data; // will be null/undefined if not found
     },
     saveAgent: async (agent) => {
@@ -182,11 +182,11 @@ const DB = (() => {
       return map;
     },
     getSeatMap: async (flightId) => {
-      const { data } = await supabase.from(KEYS.SEAT_MAPS).select('map_data').eq('id', flightId).single();
+      const { data } = await supabase.from(KEYS.SEAT_MAPS).select('map_data').eq('id', flightId).maybeSingle();
       return data ? data.map_data : {};
     },
     updateSeat: async (flightId, seatNum, seatData) => {
-      const { data: doc } = await supabase.from(KEYS.SEAT_MAPS).select('map_data').eq('id', flightId).single();
+      const { data: doc } = await supabase.from(KEYS.SEAT_MAPS).select('map_data').eq('id', flightId).maybeSingle();
       if (doc) {
         const map = doc.map_data;
         map[seatNum] = seatData;
@@ -194,7 +194,7 @@ const DB = (() => {
       }
     },
     clearSeat: async (flightId, seatNum) => {
-      const { data: doc } = await supabase.from(KEYS.SEAT_MAPS).select('map_data').eq('id', flightId).single();
+      const { data: doc } = await supabase.from(KEYS.SEAT_MAPS).select('map_data').eq('id', flightId).maybeSingle();
       if (doc) {
         const map = doc.map_data;
         if (map[seatNum]) {
