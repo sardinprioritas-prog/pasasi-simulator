@@ -605,7 +605,7 @@ function formatDate(iso) {
 
 /* ── Reset all data ────────────────────────────────────────────────────────── */
 async function resetAllData() {
-  if (!confirm('⚠️ PERHATIAN! Ini akan menghapus SEMUA data (penerbangan, penumpang, akun agent) dan muat ulang data demo dari Firebase. Lanjutkan?')) return;
+  if (!confirm('⚠️ PERHATIAN! Ini akan menghapus SEMUA data (penerbangan, penumpang, akun agent) dan muat ulang data demo dari Supabase. Lanjutkan?')) return;
   if (!confirm('Yakin? Tindakan ini akan membutuhkan waktu beberapa saat (bergantung koneksi internet) dan tidak dapat dibatalkan.')) return;
   
   toast('Sedang me-reset data... Harap tunggu.', 'info');
