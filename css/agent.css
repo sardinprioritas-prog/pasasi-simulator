@@ -1129,17 +1129,30 @@
 
 /* ── Print styles ─────────────────────────────────────────────── */
 @media print {
-  body > *:not(#boarding-pass-overlay) { display: none !important; }
-  #boarding-pass-overlay {
+  body > *:not(#boarding-pass-overlay):not(#baggage-tag-overlay) { display: none !important; }
+  
+  #boarding-pass-overlay:not(.hidden) {
     position: static !important;
     background: none !important;
     backdrop-filter: none !important;
     padding: 0 !important;
     display: block !important;
   }
+  #boarding-pass-overlay.hidden { display: none !important; }
   .bp-wrapper { max-height: none; max-width: none; }
   .bp-actions { display: none !important; }
   .boarding-pass { box-shadow: none; border: 1px solid #ccc; }
+
+  #baggage-tag-overlay:not(.hidden) {
+    position: static !important;
+    background: none !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+  #baggage-tag-overlay.hidden { display: none !important; }
+  .bt-wrapper { max-height: none; max-width: none; background: none; box-shadow: none; }
+  .bt-actions { display: none !important; }
 }
 
 /* ── Search results dropdown ─────────────────────────────────── */

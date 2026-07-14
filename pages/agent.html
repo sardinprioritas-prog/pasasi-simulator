@@ -261,6 +261,17 @@
   </div>
 </div>
 
+<!-- ═══ Baggage Tag Overlay ═══ -->
+<div id="baggage-tag-overlay" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+  <div class="bt-wrapper" style="background: var(--bg-root); border-radius: var(--r-lg); width: 100%; max-width: 400px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+    <div class="bt-actions" style="padding: 1rem; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; background: var(--bg-dark);">
+      <button class="btn btn-secondary btn-sm" onclick="BaggageTag.hide()">✕ Tutup</button>
+      <button class="btn btn-primary btn-sm" onclick="BaggageTag.print()">🖨 Cetak Label</button>
+    </div>
+    <div id="bt-content" style="flex: 1; overflow-y: auto; background: #f0f2f5;"></div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/supabase-config.js"></script>
 <script src="../js/db.js"></script>
@@ -268,6 +279,7 @@
 <script src="../js/seed.js"></script>
 <script src="../js/seatmap.js"></script>
 <script src="../js/boarding.js"></script>
+<script src="../js/baggage-tag.js"></script>
 <script src="../js/agent.js"></script>
 <script>
   // ── Guard ────────────────────────────────────────────────────────────────

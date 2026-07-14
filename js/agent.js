@@ -539,7 +539,11 @@ function renderDonePanel() {
       </button>
       ${p.boardingPassIssued ? `
       <button class="btn btn-secondary" onclick="reprintBoardingPass()">
-        🖨 Cetak Ulang
+        🖨 Cetak Ulang BP
+      </button>` : ''}
+      ${p.baggageItems > 0 ? `
+      <button class="btn btn-secondary" onclick="printBaggageTags()">
+        🖨 Cetak Label Bagasi
       </button>` : ''}
     </div>
     ${p.boardingPassIssued ? `
@@ -586,6 +590,12 @@ async function issueBoardingPass() {
 function reprintBoardingPass() {
   if (_currentPax && _currentFlight) {
     BoardingPass.show(_currentPax, _currentFlight);
+  }
+}
+
+function printBaggageTags() {
+  if (_currentPax && _currentFlight) {
+    BaggageTag.show(_currentPax, _currentFlight);
   }
 }
 
