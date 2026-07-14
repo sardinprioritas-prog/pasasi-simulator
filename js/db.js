@@ -54,29 +54,29 @@ const DB = (() => {
   return {
     // Seed flag
     isSeeded: async () => {
-      const { data, error } = await supabase.from(KEYS.SYSTEM).select('seeded').eq('id', 'seed_status').maybeSingle();
+      const { data, error } = await supabaseClient.from(KEYS.SYSTEM).select('seeded').eq('id', 'seed_status').maybeSingle();
       return data ? data.seeded : false;
     },
     markSeeded: async () => {
-      await supabase.from(KEYS.SYSTEM).upsert({ id: 'seed_status', seeded: true });
+      await supabaseClient.from(KEYS.SYSTEM).upsert({ id: 'seed_status', seeded: true });
     },
     clearAll: async () => {
       // In Supabase, deleting with a valid condition is required, or calling a stored procedure.
       // Since we just want to clear everything, we delete where id is not null.
-      await supabase.from(KEYS.PASSENGERS).delete().neq('id', '');
-      await supabase.from(KEYS.SEAT_MAPS).delete().neq('id', '');
-      await supabase.from(KEYS.FLIGHTS).delete().neq('id', '');
-      await supabase.from(KEYS.AGENTS).delete().neq('id', '');
-      await supabase.from(KEYS.SYSTEM).delete().eq('id', 'seed_status');
+      await supabaseClient.from(KEYS.PASSENGERS).delete().neq('id', '');
+      await supabaseClient.from(KEYS.SEAT_MAPS).delete().neq('id', '');
+      await supabaseClient.from(KEYS.FLIGHTS).delete().neq('id', '');
+      await supabaseClient.from(KEYS.AGENTS).delete().neq('id', '');
+      await supabaseClient.from(KEYS.SYSTEM).delete().eq('id', 'seed_status');
     },
 
     // ── Flights ─────────────────────────────────────────────────────────────
     getFlights: async () => {
-      const { data } = await supabase.from(KEYS.FLIGHTS).select('*');
+      const { data } = await supabaseClient.from(KEYS.FLIGHTS).select('*');
       return data || [];
     },
     getFlight: async (id) => {
-      const { data } = await supabase.from(KEYS.FLIGHTS).select('*').eq('id', id).maybeSingle();
+      const { data } = await supabaseClient.from(KEYS.FLIGHTS).select('*').eq('id', id).maybeSingle();
       return data;
     },
     saveFlight: async (flight) => {
@@ -84,32 +84,32 @@ const DB = (() => {
         flight.id = 'FL' + _id();
         flight.createdAt = new Date().toISOString();
       }
-      await supabase.from(KEYS.FLIGHTS).upsert(flight);
+      await supabaseClient.from(KEYS.FLIGHTS).upsert(flight);
       return flight;
     },
     deleteFlight: async (id) => {
       // Cascading deletes on foreign keys will handle passengers and seatmaps in Supabase
-      await supabase.from(KEYS.FLIGHTS).delete().eq('id', id);
+      await supabaseClient.from(KEYS.FLIGHTS).delete().eq('id', id);
     },
 
     // ── Passengers ──────────────────────────────────────────────────────────
     getPassengers: async () => {
-      const { data } = await supabase.from(KEYS.PASSENGERS).select('*');
+      const { data } = await supabaseClient.from(KEYS.PASSENGERS).select('*');
       return data || [];
     },
     getPassenger: async (id) => {
-      const { data } = await supabase.from(KEYS.PASSENGERS).select('*').eq('id', id).maybeSingle();
+      const { data } = await supabaseClient.from(KEYS.PASSENGERS).select('*').eq('id', id).maybeSingle();
       return data;
     },
     getFlightPassengers: async (fid) => {
-      const { data } = await supabase.from(KEYS.PASSENGERS).select('*').eq('flightId', fid);
+      const { data } = await supabaseClient.from(KEYS.PASSENGERS).select('*').eq('flightId', fid);
       return data || [];
     },
     searchPassengers: async (query) => {
       const q = query.toUpperCase().trim();
       if (!q) return [];
       
-      const { data } = await supabase.from(KEYS.PASSENGERS)
+      const { data } = await supabaseClient.from(KEYS.PASSENGERS)
         .select('*')
         .or(`pnr.ilike.%${q}%,firstName.ilike.%${q}%,lastName.ilike.%${q}%`);
         
@@ -120,14 +120,14 @@ const DB = (() => {
         passenger.id = 'PAX' + _id();
         passenger.createdAt = new Date().toISOString();
       }
-      await supabase.from(KEYS.PASSENGERS).upsert(passenger);
+      await supabaseClient.from(KEYS.PASSENGERS).upsert(passenger);
       return passenger;
     },
     deletePassenger: async (id) => {
-      await supabase.from(KEYS.PASSENGERS).delete().eq('id', id);
+      await supabaseClient.from(KEYS.PASSENGERS).delete().eq('id', id);
     },
     isPNRUnique: async (pnr, excludeId = null) => {
-      const { data } = await supabase.from(KEYS.PASSENGERS).select('id').eq('pnr', pnr.toUpperCase());
+      const { data } = await supabaseClient.from(KEYS.PASSENGERS).select('id').eq('pnr', pnr.toUpperCase());
       if (!data || data.length === 0) return true;
       let unique = true;
       data.forEach(p => {
@@ -138,15 +138,15 @@ const DB = (() => {
 
     // ── Agents ──────────────────────────────────────────────────────────────
     getAgents: async () => {
-      const { data } = await supabase.from(KEYS.AGENTS).select('*');
+      const { data } = await supabaseClient.from(KEYS.AGENTS).select('*');
       return data || [];
     },
     getAgent: async (id) => {
-      const { data } = await supabase.from(KEYS.AGENTS).select('*').eq('id', id).maybeSingle();
+      const { data } = await supabaseClient.from(KEYS.AGENTS).select('*').eq('id', id).maybeSingle();
       return data;
     },
     getAgentByCredentials: async (agentId, password) => {
-      const { data } = await supabase.from(KEYS.AGENTS)
+      const { data } = await supabaseClient.from(KEYS.AGENTS)
         .select('*')
         .eq('agentId', agentId.toUpperCase())
         .eq('password', password)
@@ -159,14 +159,14 @@ const DB = (() => {
         agent.id = 'AGT' + _id();
         agent.createdAt = new Date().toISOString();
       }
-      await supabase.from(KEYS.AGENTS).upsert(agent);
+      await supabaseClient.from(KEYS.AGENTS).upsert(agent);
       return agent;
     },
     deleteAgent: async (id) => {
-      await supabase.from(KEYS.AGENTS).delete().eq('id', id);
+      await supabaseClient.from(KEYS.AGENTS).delete().eq('id', id);
     },
     isAgentIdUnique: async (agentId, excludeId = null) => {
-      const { data } = await supabase.from(KEYS.AGENTS).select('id').eq('agentId', agentId.toUpperCase());
+      const { data } = await supabaseClient.from(KEYS.AGENTS).select('id').eq('agentId', agentId.toUpperCase());
       if (!data || data.length === 0) return true;
       let unique = true;
       data.forEach(a => {
@@ -178,29 +178,29 @@ const DB = (() => {
     // ── Seat Map ────────────────────────────────────────────────────────────
     initSeatMap: async (flightId, aircraft) => {
       const map = _generateSeatMap(aircraft);
-      await supabase.from(KEYS.SEAT_MAPS).upsert({ id: flightId, map_data: map });
+      await supabaseClient.from(KEYS.SEAT_MAPS).upsert({ id: flightId, map_data: map });
       return map;
     },
     getSeatMap: async (flightId) => {
-      const { data } = await supabase.from(KEYS.SEAT_MAPS).select('map_data').eq('id', flightId).maybeSingle();
+      const { data } = await supabaseClient.from(KEYS.SEAT_MAPS).select('map_data').eq('id', flightId).maybeSingle();
       return data ? data.map_data : {};
     },
     updateSeat: async (flightId, seatNum, seatData) => {
-      const { data: doc } = await supabase.from(KEYS.SEAT_MAPS).select('map_data').eq('id', flightId).maybeSingle();
+      const { data: doc } = await supabaseClient.from(KEYS.SEAT_MAPS).select('map_data').eq('id', flightId).maybeSingle();
       if (doc) {
         const map = doc.map_data;
         map[seatNum] = seatData;
-        await supabase.from(KEYS.SEAT_MAPS).update({ map_data: map }).eq('id', flightId);
+        await supabaseClient.from(KEYS.SEAT_MAPS).update({ map_data: map }).eq('id', flightId);
       }
     },
     clearSeat: async (flightId, seatNum) => {
-      const { data: doc } = await supabase.from(KEYS.SEAT_MAPS).select('map_data').eq('id', flightId).maybeSingle();
+      const { data: doc } = await supabaseClient.from(KEYS.SEAT_MAPS).select('map_data').eq('id', flightId).maybeSingle();
       if (doc) {
         const map = doc.map_data;
         if (map[seatNum]) {
           map[seatNum].occupied = false;
           map[seatNum].passengerId = null;
-          await supabase.from(KEYS.SEAT_MAPS).update({ map_data: map }).eq('id', flightId);
+          await supabaseClient.from(KEYS.SEAT_MAPS).update({ map_data: map }).eq('id', flightId);
         }
       }
     },

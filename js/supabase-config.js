@@ -4,6 +4,6 @@ const supabaseUrl = 'https://xxudgwzihmqnojnkqnvk.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh4dWRnd3ppaG1xbm9qbmtxbnZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwMDA1NDIsImV4cCI6MjA5OTU3NjU0Mn0.Tz0rBZy8cXsr4uOwRGWYfNKETTxeJYT_wYJqhufXr1I';
 
 // Inisialisasi Supabase
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 console.log("[Supabase] Inisialisasi selesai.");
