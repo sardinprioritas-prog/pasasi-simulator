@@ -654,3 +654,9 @@ function formatTime(iso) {
     return new Date(iso).toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit', hour12:false });
   } catch { return '—'; }
 }
+
+// ── Mobile Responsive ──
+function toggleSidebar() {
+  const panel = document.querySelector('.left-panel');
+  if (panel) panel.classList.toggle('open');
+}

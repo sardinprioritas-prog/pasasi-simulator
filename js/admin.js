@@ -619,3 +619,9 @@ async function resetAllData() {
     toast('Gagal me-reset data.', 'error');
   }
 }
+
+// ── Mobile Responsive ──
+function toggleSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  if (sidebar) sidebar.classList.toggle('open');
+}

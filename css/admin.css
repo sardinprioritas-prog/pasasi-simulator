@@ -372,3 +372,27 @@
 /* ── Modal (large) ───────────────────────────────────────────── */
 .modal-lg { max-width: 720px; }
 .modal-xl { max-width: 900px; }
+
+/* ── Responsive Admin Mobile ─────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .admin-layout { flex-direction: column; }
+  
+  .sidebar {
+    position: fixed;
+    top: 0; left: -250px;
+    width: 250px; height: 100vh;
+    z-index: 1000;
+    transition: left 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+  }
+  .sidebar.open { left: 0; }
+  
+  .admin-topbar { padding: 0.75rem 1rem; }
+  .admin-content { padding: 1rem; }
+  
+  .stats-row { flex-direction: column; }
+  
+  .hamburger-btn { display: inline-flex; }
+  
+  .manifest-table-wrap { width: 100%; overflow-x: auto; }
+}

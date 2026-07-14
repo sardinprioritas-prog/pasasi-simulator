@@ -672,3 +672,32 @@ select.form-control {
   color: var(--text-primary);
   background: var(--bg-hover);
 }
+
+/* ── Hamburger Button ────────────────────────────────────────────────────── */
+.hamburger-btn {
+  display: none; /* Hidden on desktop */
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  margin-right: 1rem;
+}
+
+/* ── Responsive Mobile/Tablet Base ───────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Modals */
+  .modal-lg { max-width: 95% !important; padding: 1.5rem !important; }
+  .modal { padding: 1.5rem !important; }
+  
+  /* Tables */
+  .data-table th, .data-table td { padding: 0.75rem 0.5rem; font-size: 0.8rem; }
+  .table-responsive { width: 100%; overflow-x: auto; }
+  
+  /* Login Page */
+  .login-card { padding: 1.5rem; }
+  .role-selector { flex-direction: column; }
+  .brand-icon { font-size: 2rem; }
+  .brand-name { font-size: 1.4rem; }
+}
