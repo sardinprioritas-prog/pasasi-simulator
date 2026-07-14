@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AeroCheck — Admin Panel</title>
+  <meta name="description" content="Admin/Instruktur panel untuk mengelola penerbangan, manifest penumpang, dan akun agent.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡</text></svg>">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+<div id="toast-container"></div>
+
+<div class="admin-layout">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="logo">✈ AeroCheck</div>
+      <div class="role-tag">🛡 ADMIN PANEL</div>
+    </div>
+
+    <div class="sidebar-agent-info" id="sidebar-agent-info">
+      <div class="agent-name" id="sb-agent-name">—</div>
+      <div class="agent-id" id="sb-agent-id">—</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">OVERVIEW</div>
+      <button class="nav-item active" id="nav-dashboard" onclick="navigate('dashboard')">
+        <span class="nav-icon">📊</span> Dashboard
+      </button>
+
+      <div class="nav-section-title">DATA MASTER</div>
+      <button class="nav-item" id="nav-flights" onclick="navigate('flights')">
+        <span class="nav-icon">✈</span> Flight Master
+        <span class="nav-badge" id="badge-flights">0</span>
+      </button>
+      <button class="nav-item" id="nav-manifest" onclick="navigate('manifest')">
+        <span class="nav-icon">📋</span> Manifest
+        <span class="nav-badge" id="badge-pax">0</span>
+      </button>
+
+      <div class="nav-section-title">USERS</div>
+      <button class="nav-item" id="nav-agents" onclick="navigate('agents')">
+        <span class="nav-icon">👥</span> Agent Accounts
+        <span class="nav-badge" id="badge-agents">0</span>
+      </button>
+
+      <div class="nav-section-title">SYSTEM</div>
+      <button class="nav-item" onclick="resetAllData()" style="color:var(--red);">
+        <span class="nav-icon">🔄</span> Reset Data Demo
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="btn-logout-sidebar" onclick="Auth.logout()">
+        🚪 Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <div class="admin-main">
+
+    <!-- Topbar -->
+    <div class="admin-topbar">
+      <div>
+        <div class="page-title" id="page-title">📊 DASHBOARD</div>
+        <div class="page-sub" id="page-sub">Ringkasan aktivitas hari ini</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <div style="text-align:right;">
+          <div style="font-size:0.7rem;color:var(--text-muted);">SESSION TIME</div>
+          <div style="font-family:var(--font-mono);font-size:0.85rem;color:var(--amber);" id="clock-topbar">--:--</div>
+        </div>
+        <div style="width:1px;height:30px;background:var(--border-subtle);"></div>
+        <div style="font-size:0.72rem;color:var(--text-muted);">
+          <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);margin-right:0.35rem;"></span>
+          SISTEM AKTIF
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="admin-content">
+
+      <!-- ── Page: Dashboard ── -->
+      <div class="admin-page active" id="page-dashboard">
+        <div class="stats-row" id="stats-row">
+          <div class="stat-card">
+            <div class="stat-value text-cyan" id="stat-flights">0</div>
+            <div class="stat-label">Penerbangan Aktif</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value text-amber" id="stat-pax">0</div>
+            <div class="stat-label">Total Penumpang</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value text-green" id="stat-checked">0</div>
+            <div class="stat-label">Sudah Check-In</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-agents">0</div>
+            <div class="stat-label">Agent Aktif</div>
+          </div>
+        </div>
+
+        <div class="section-header">
+          <div>
+            <div class="section-title">Status Penerbangan Hari Ini</div>
+            <div class="section-sub">Progress check-in per penerbangan</div>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="renderDashboard()">🔄 Refresh</button>
+        </div>
+        <div id="dashboard-flights"></div>
+      </div>
+
+      <!-- ── Page: Flights ── -->
+      <div class="admin-page" id="page-flights">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Jadwal Penerbangan</div>
+            <div class="section-sub">Kelola penerbangan untuk sesi praktik</div>
+          </div>
+          <button class="btn btn-primary" onclick="openFlightModal()">+ Tambah Penerbangan</button>
+        </div>
+        <div id="flights-list"></div>
+      </div>
+
+      <!-- ── Page: Manifest ── -->
+      <div class="admin-page" id="page-manifest">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Manifest Penumpang</div>
+            <div class="section-sub">Kelola daftar penumpang per penerbangan</div>
+          </div>
+          <button class="btn btn-primary" onclick="openPaxModal()">+ Tambah Penumpang</button>
+        </div>
+
+        <div class="manifest-table-wrap">
+          <div class="manifest-filter">
+            <select class="form-control" id="manifest-flight-select" onchange="renderManifestTable()"
+              style="max-width:360px;">
+              <option value="">— Pilih Penerbangan —</option>
+            </select>
+            <div style="margin-left:auto;font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted);"
+              id="manifest-pax-count"></div>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>PNR</th>
+                  <th>Nama Penumpang</th>
+                  <th>Kelas</th>
+                  <th>FBA</th>
+                  <th>SSR</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="manifest-table-body">
+                <tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem;">Pilih penerbangan di atas.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Page: Agents ── -->
+      <div class="admin-page" id="page-agents">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Akun Agent Check-In</div>
+            <div class="section-sub">Buat dan kelola akun untuk siswa</div>
+          </div>
+          <button class="btn btn-primary" onclick="openAgentModal()">+ Tambah Agent</button>
+        </div>
+
+        <div class="manifest-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Agent ID</th>
+                <th>Nama</th>
+                <th>Role</th>
+                <th>Dibuat</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="agents-table-body"></tbody>
+          </table>
+        </div>
+
+        <div style="margin-top:1.5rem;padding:1rem 1.25rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--r-lg);">
+          <div class="label" style="margin-bottom:0.75rem;">🔑 DEFAULT CREDENTIALS</div>
+          <div style="font-family:var(--font-mono);font-size:0.8rem;color:var(--text-secondary);line-height:1.8;">
+            AGENT001 / agent123 &nbsp;·&nbsp; AGENT002 / agent123 &nbsp;·&nbsp; AGENT003 / agent123
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /admin-content -->
+  </div><!-- /admin-main -->
+
+</div><!-- /admin-layout -->
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Modal: Add/Edit Flight -->
+<div class="modal-overlay hidden" id="modal-flight-overlay">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3 id="modal-flight-title">Tambah Penerbangan</h3>
+      <button class="modal-close" onclick="closeModal('modal-flight')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-flight" onsubmit="return false;">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Nomor Penerbangan *</label>
+            <input type="text" id="ff-num" class="form-control mono" placeholder="NU-101" maxlength="10">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tipe Pesawat</label>
+            <select id="ff-acft" class="form-control">
+              <option value="B737-800">Boeing 737-800</option>
+              <option value="A320">Airbus A320</option>
+              <option value="ATR72">ATR 72-600</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kode Bandara Asal *</label>
+            <input type="text" id="ff-org" class="form-control mono" placeholder="CGK" maxlength="3">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kota Asal</label>
+            <input type="text" id="ff-orgc" class="form-control" placeholder="Jakarta">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kode Bandara Tujuan *</label>
+            <input type="text" id="ff-dst" class="form-control mono" placeholder="DPS" maxlength="3">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kota Tujuan</label>
+            <input type="text" id="ff-dstc" class="form-control" placeholder="Denpasar">
+          </div>
+          <div class="form-group">
+            <label class="form-label">STD (Sched. Departure) *</label>
+            <input type="datetime-local" id="ff-std" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">STA (Sched. Arrival)</label>
+            <input type="datetime-local" id="ff-sta" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Boarding Time</label>
+            <input type="datetime-local" id="ff-board" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select id="ff-status" class="form-control">
+              <option value="ON TIME">ON TIME</option>
+              <option value="DELAYED">DELAYED</option>
+              <option value="BOARDING">BOARDING</option>
+              <option value="CANCELLED">CANCELLED</option>
+              <option value="DEPARTED">DEPARTED</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Gate</label>
+            <input type="text" id="ff-gate" class="form-control mono" placeholder="G7" maxlength="5">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Terminal</label>
+            <input type="text" id="ff-term" class="form-control mono" placeholder="T3" maxlength="4">
+          </div>
+          <div class="form-group span-2">
+            <label class="form-label">Counter Check-In</label>
+            <input type="text" id="ff-ctr" class="form-control" placeholder="D3 – D6">
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-flight')">Batal</button>
+      <button class="btn btn-primary" onclick="saveFlightForm()">💾 Simpan Penerbangan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Add/Edit Passenger -->
+<div class="modal-overlay hidden" id="modal-pax-overlay">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3 id="modal-pax-title">Tambah Penumpang</h3>
+      <button class="modal-close" onclick="closeModal('modal-pax')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-pax" onsubmit="return false;">
+        <div class="form-grid">
+          <div class="form-group span-2">
+            <label class="form-label">Penerbangan *</label>
+            <select id="fp-flight" class="form-control"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kode PNR / Booking *</label>
+            <input type="text" id="fp-pnr" class="form-control mono" placeholder="ABC123" maxlength="6"
+              oninput="this.value=this.value.toUpperCase()">
+            <span class="form-hint">6 karakter alfanumerik</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Title</label>
+            <select id="fp-title" class="form-control">
+              <option value="MR">MR</option>
+              <option value="MRS">MRS</option>
+              <option value="MS">MS</option>
+              <option value="MSTR">MSTR (Anak)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nama Belakang *</label>
+            <input type="text" id="fp-last" class="form-control" placeholder="SANTOSO"
+              oninput="this.value=this.value.toUpperCase()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nama Depan *</label>
+            <input type="text" id="fp-first" class="form-control" placeholder="BUDI"
+              oninput="this.value=this.value.toUpperCase()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kelas Kabin</label>
+            <select id="fp-class" class="form-control">
+              <option value="Y">Y — Economy</option>
+              <option value="C">C — Business</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Free Baggage Allowance (kg)</label>
+            <input type="number" id="fp-fba" class="form-control" value="20" min="0" max="60">
+          </div>
+          <div class="form-group span-2">
+            <label class="form-label">SSR — Special Service Request</label>
+            <div class="ssr-grid" style="margin-top:0.3rem;">
+              <label class="ssr-checkbox"><input type="checkbox" class="ssr-cb" value="WCHR" onchange="toggleSSR(this)"> ♿ WCHR — Wheelchair</label>
+              <label class="ssr-checkbox"><input type="checkbox" class="ssr-cb" value="VGML" onchange="toggleSSR(this)"> 🥦 VGML — Vegetarian</label>
+              <label class="ssr-checkbox"><input type="checkbox" class="ssr-cb" value="HNML" onchange="toggleSSR(this)"> 🛕 HNML — Hindu Meal</label>
+              <label class="ssr-checkbox"><input type="checkbox" class="ssr-cb" value="BLND" onchange="toggleSSR(this)"> 👁 BLND — Blind</label>
+              <label class="ssr-checkbox"><input type="checkbox" class="ssr-cb" value="DEAF" onchange="toggleSSR(this)"> 🔇 DEAF — Deaf</label>
+              <label class="ssr-checkbox"><input type="checkbox" class="ssr-cb" value="MEDA" onchange="toggleSSR(this)"> 🏥 MEDA — Medical</label>
+              <label class="ssr-checkbox"><input type="checkbox" class="ssr-cb" value="CHLD" onchange="toggleSSR(this)"> 🧒 CHLD — Child (UM)</label>
+              <label class="ssr-checkbox"><input type="checkbox" class="ssr-cb" value="FRAG" onchange="toggleSSR(this)"> 📦 FRAG — Fragile</label>
+              <label class="ssr-checkbox"><input type="checkbox" class="ssr-cb" value="BULK" onchange="toggleSSR(this)"> 🎿 BULK — Bulk Item</label>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-pax')">Batal</button>
+      <button class="btn btn-primary" onclick="savePaxForm()">💾 Simpan Penumpang</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Add/Edit Agent -->
+<div class="modal-overlay hidden" id="modal-agent-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-agent-title">Tambah Agent</h3>
+      <button class="modal-close" onclick="closeModal('modal-agent')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-agent" onsubmit="return false;">
+        <div style="display:flex;flex-direction:column;gap:1rem;">
+          <div class="form-group">
+            <label class="form-label">Agent ID *</label>
+            <input type="text" id="fa-id" class="form-control mono" placeholder="AGENT004" maxlength="12"
+              oninput="this.value=this.value.toUpperCase()">
+            <span class="form-hint">Huruf kapital, minimal 4 karakter</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nama Lengkap *</label>
+            <input type="text" id="fa-name" class="form-control" placeholder="Nama Agent">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password *</label>
+            <input type="text" id="fa-pwd" class="form-control mono" placeholder="Minimal 6 karakter">
+            <span class="form-hint">Disimpan sebagai plaintext untuk tujuan simulasi</span>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-agent')">Batal</button>
+      <button class="btn btn-primary" onclick="saveAgentForm()">💾 Simpan Agent</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase-config.js"></script>
+<script src="../js/db.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/seed.js"></script>
+<script src="../js/admin.js"></script>
+<script>
+  // Guard
+  if (!Auth.requireRole('admin')) throw new Error('Unauthorized');
+  
+  (async () => {
+    await Seed.run();
+    await updateSidebarBadges();
+    await renderDashboard();
+  })();
+
+  // Populate session info
+  const _sess = Auth.getSession();
+  document.getElementById('sb-agent-name').textContent = _sess.name;
+  document.getElementById('sb-agent-id').textContent   = _sess.agentId + ' · ADMIN';
+
+  // Clock
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('clock-topbar').textContent =
+      now.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false });
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // Populate session info
+
+  // Close modal on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) {
+        const id = overlay.id.replace('-overlay', '');
+        closeModal(id);
+      }
+    });
+  });
+</script>
+</body>
+</html>

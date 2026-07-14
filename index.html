@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AeroCheck Simulator — Login</title>
+  <meta name="description" content="Simulasi sistem check-in maskapai penerbangan untuk pelatihan Ground Staff. Login sebagai Agent atau Admin.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✈</text></svg>">
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    /* ── Login page specific ───────────────────────────────── */
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: var(--bg-root);
+      overflow-y: auto;
+    }
+
+    /* Animated background */
+    .bg-scene {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    /* Grid */
+    .bg-grid-layer {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
+      background-size: 50px 50px;
+    }
+
+    /* Radial glow */
+    .bg-glow-1 {
+      position: absolute;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 70%);
+      top: -200px; left: -100px;
+      animation: float-1 12s ease-in-out infinite;
+    }
+    .bg-glow-2 {
+      position: absolute;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(199,125,255,0.06) 0%, transparent 70%);
+      bottom: -100px; right: -100px;
+      animation: float-2 15s ease-in-out infinite;
+    }
+    .bg-glow-3 {
+      position: absolute;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(255,179,0,0.05) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation: float-3 20s ease-in-out infinite;
+    }
+
+    /* Stars */
+    .stars {
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 80% 10%, rgba(0,212,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 10% 80%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 60% 70%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 35% 55%, rgba(0,212,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 50%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 45% 15%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 70% 85%, rgba(0,212,255,0.3) 0%, transparent 100%);
+    }
+
+    /* Scanlines overlay */
+    .scanlines {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.03) 2px,
+        rgba(0, 0, 0, 0.03) 4px
+      );
+      pointer-events: none;
+    }
+
+    @keyframes float-1 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50%       { transform: translate(40px, 30px) scale(1.1); }
+    }
+    @keyframes float-2 {
+      0%, 100% { transform: translate(0, 0); }
+      50%       { transform: translate(-50px, -30px); }
+    }
+    @keyframes float-3 {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      33%       { transform: translate(-55%, -45%) scale(1.2); }
+      66%       { transform: translate(-45%, -55%) scale(0.9); }
+    }
+
+    /* ── Login card ───────────────────────────── */
+    .login-wrapper {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 440px;
+      padding: 1rem;
+    }
+
+    /* Top brand bar */
+    .brand {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .brand-icon {
+      font-size: 2.5rem;
+      display: block;
+      margin-bottom: 0.5rem;
+      filter: drop-shadow(0 0 20px rgba(0,212,255,0.6));
+      animation: float-icon 4s ease-in-out infinite;
+    }
+    @keyframes float-icon {
+      0%, 100% { transform: translateY(0) rotate(-5deg); }
+      50%       { transform: translateY(-8px) rotate(5deg); }
+    }
+    .brand-name {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      background: linear-gradient(135deg, #fff 0%, var(--cyan) 60%, #7af7ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .brand-sub {
+      font-size: 0.72rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    /* Card */
+    .login-card {
+      background: rgba(11, 16, 28, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-dim);
+      border-radius: var(--r-xl);
+      padding: 2rem;
+      box-shadow:
+        0 0 0 1px rgba(0,212,255,0.06),
+        0 20px 60px rgba(0, 0, 0, 0.7),
+        0 0 40px rgba(0, 212, 255, 0.08);
+    }
+
+    /* Role selector */
+    .role-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-bottom: 1.75rem;
+      background: var(--bg-dark);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--r-md);
+      padding: 0.35rem;
+    }
+
+    .role-btn {
+      padding: 0.65rem 0.5rem;
+      border-radius: calc(var(--r-md) - 2px);
+      border: none;
+      cursor: pointer;
+      font-family: var(--font-ui);
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      transition: all var(--t-med);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      color: var(--text-muted);
+      background: none;
+    }
+    .role-btn.active {
+      background: var(--cyan);
+      color: #000;
+      box-shadow: 0 0 20px rgba(0,212,255,0.4);
+    }
+    .role-btn:not(.active):hover {
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+    #role-admin.active {
+      background: var(--amber);
+      color: #000;
+      box-shadow: 0 0 20px rgba(255,179,0,0.4);
+    }
+
+    /* System tag */
+    .system-tag {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 1.5rem;
+      padding: 0.6rem 0.9rem;
+      background: var(--bg-dark);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--r-md);
+    }
+    .system-tag .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse-dot 2s ease infinite;
+      flex-shrink: 0;
+    }
+    .system-tag span {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+    .system-tag .sys-name {
+      color: var(--green);
+      font-weight: 600;
+    }
+
+    /* Form */
+    .login-form { display: flex; flex-direction: column; gap: 1.1rem; }
+
+    .login-form .form-control {
+      font-family: var(--font-mono);
+      letter-spacing: 0.08em;
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 0.9rem;
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+      margin-top: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-login::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.5s;
+    }
+    .btn-login:hover::after { transform: translateX(100%); }
+
+    .btn-login-admin {
+      background: var(--amber);
+      color: #000;
+      box-shadow: 0 0 20px rgba(255,179,0,0.3);
+    }
+    .btn-login-admin:hover {
+      background: #ffc107;
+      box-shadow: 0 0 30px rgba(255,179,0,0.5);
+    }
+
+    /* Error */
+    .login-error {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 0.9rem;
+      background: var(--red-dim);
+      border: 1px solid rgba(255,77,109,0.3);
+      border-radius: var(--r-md);
+      font-size: 0.82rem;
+      color: var(--red);
+      animation: shake 0.4s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60%  { transform: translateX(-6px); }
+      40%, 80%  { transform: translateX(6px); }
+    }
+
+    /* Footer */
+    .login-footer {
+      text-align: center;
+      margin-top: 1.75rem;
+    }
+    .login-footer p {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+    }
+    .login-footer .version {
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      font-size: 0.65rem;
+    }
+
+    /* Quick login hint */
+    .hint-box {
+      margin-top: 1.25rem;
+      padding: 0.9rem 1rem;
+      background: var(--bg-dark);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--r-md);
+    }
+    .hint-box .hint-title {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.6rem;
+    }
+    .hint-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.3rem 0;
+      font-size: 0.78rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .hint-row:last-child { border-bottom: none; }
+    .hint-row .role-tag {
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      background: var(--cyan-dim);
+      color: var(--cyan);
+    }
+    .hint-row .role-tag.admin {
+      background: var(--amber-dim);
+      color: var(--amber);
+    }
+    .hint-row .creds {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Background -->
+<div class="bg-scene">
+  <div class="bg-grid-layer"></div>
+  <div class="stars"></div>
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+  <div class="bg-glow-3"></div>
+  <div class="scanlines"></div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- Login -->
+<div class="login-wrapper">
+
+  <!-- Brand -->
+  <div class="brand">
+    <span class="brand-icon">✈</span>
+    <div class="brand-name">AeroCheck</div>
+    <div class="brand-sub">Passenger Service Simulator</div>
+    <div class="brand-sub" style="margin-top: 0.4rem; color: var(--cyan); font-weight: 600; letter-spacing: 0.15em;">TRIESAKTI INSTITUTE OF AIRLINES</div>
+  </div>
+
+  <!-- Card -->
+  <div class="login-card">
+
+    <!-- System status -->
+    <div class="system-tag">
+      <div class="dot"></div>
+      <span>SYSTEM: <span class="sys-name">TRIESAKTI AIR — Ver1.0</span> &nbsp;|&nbsp; ONLINE</span>
+    </div>
+
+    <!-- Role selector -->
+    <div class="role-selector">
+      <button class="role-btn active" id="role-agent" onclick="switchRole('agent')">
+        👤 AGENT / CHECK-IN
+      </button>
+      <button class="role-btn" id="role-admin" onclick="switchRole('admin')">
+        🛡 ADMIN / INSTRUKTUR
+      </button>
+    </div>
+
+    <!-- Form -->
+    <form class="login-form" id="login-form" onsubmit="handleLogin(event)" novalidate>
+
+      <div class="form-group">
+        <label class="form-label" for="input-agent-id">
+          <span id="id-label">AGENT ID</span>
+        </label>
+        <div class="input-group">
+          <span class="input-icon">🪪</span>
+          <input
+            type="text"
+            id="input-agent-id"
+            class="form-control mono"
+            placeholder="Contoh: AGENT001"
+            autocomplete="username"
+            spellcheck="false"
+            required
+          >
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="input-password">PASSWORD</label>
+        <div class="input-group" style="position:relative;">
+          <span class="input-icon">🔑</span>
+          <input
+            type="password"
+            id="input-password"
+            class="form-control mono"
+            placeholder="••••••••"
+            autocomplete="current-password"
+            required
+          >
+          <button type="button" onclick="togglePwd()" id="pwd-toggle"
+            style="position:absolute;right:0.75rem;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.85rem;padding:0.25rem;">
+            👁
+          </button>
+        </div>
+      </div>
+
+      <div id="login-error" class="hidden"></div>
+
+      <button type="submit" class="btn btn-primary btn-login" id="btn-login">
+        <span id="btn-login-text">🔓 LOGIN AS AGENT</span>
+      </button>
+
+    </form>
+
+    <!-- Credentials hint -->
+    <div class="hint-box">
+      <div class="hint-title">💡 Demo Credentials</div>
+      <div class="hint-row">
+        <span class="role-tag">AGENT</span>
+        <span class="creds">AGENT001 / agent123</span>
+      </div>
+      <div class="hint-row">
+        <span class="role-tag">AGENT</span>
+        <span class="creds">AGENT002 / agent123</span>
+      </div>
+      <div class="hint-row">
+        <span class="role-tag admin">ADMIN</span>
+        <span class="creds">ADMIN / admin123</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="login-footer">
+    <p>Untuk keperluan pelatihan. Data bersifat simulasi.</p>
+    <p class="version mt-1">AeroCheck Simulator v1.0 — © 2026</p>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/db.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/seed.js"></script>
+<script>
+  // ── Init ──────────────────────────────────────────────────────────────────
+  Seed.run();
+
+  // If already logged in, redirect
+  const _session = Auth.getSession();
+  if (_session) {
+    window.location.href = _session.role === 'admin' ? 'pages/admin.html' : 'pages/agent.html';
+  }
+
+  // ── State ─────────────────────────────────────────────────────────────────
+  let currentRole = 'agent';
+
+  // ── Role switch ───────────────────────────────────────────────────────────
+  function switchRole(role) {
+    currentRole = role;
+    document.getElementById('role-agent').classList.toggle('active', role === 'agent');
+    document.getElementById('role-admin').classList.toggle('active', role === 'admin');
+
+    const idLabel   = document.getElementById('id-label');
+    const btnText   = document.getElementById('btn-login-text');
+    const btnLogin  = document.getElementById('btn-login');
+    const idInput   = document.getElementById('input-agent-id');
+
+    if (role === 'admin') {
+      idLabel.textContent      = 'ADMIN ID';
+      btnText.textContent      = '🔓 LOGIN AS ADMIN';
+      btnLogin.classList.remove('btn-primary');
+      btnLogin.classList.add('btn-login-admin');
+      idInput.placeholder      = 'Contoh: ADMIN';
+    } else {
+      idLabel.textContent      = 'AGENT ID';
+      btnText.textContent      = '🔓 LOGIN AS AGENT';
+      btnLogin.classList.add('btn-primary');
+      btnLogin.classList.remove('btn-login-admin');
+      idInput.placeholder      = 'Contoh: AGENT001';
+    }
+    clearError();
+  }
+
+  // ── Login handler ─────────────────────────────────────────────────────────
+  async function handleLogin(e) {
+    e.preventDefault();
+    clearError();
+
+    const agentId = document.getElementById('input-agent-id').value.trim();
+    const password = document.getElementById('input-password').value;
+
+    if (!agentId || !password) {
+      showError('⚠ Mohon isi semua field.');
+      return;
+    }
+
+    const btn     = document.getElementById('btn-login');
+    const btnText = document.getElementById('btn-login-text');
+
+    // Loading state
+    btn.disabled = true;
+    btnText.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;"></span> &nbsp;AUTHENTICATING...';
+
+    try {
+      const session = await Auth.login(agentId, password);
+
+      if (!session) {
+        btn.disabled = false;
+        btnText.textContent = currentRole === 'admin' ? '🔓 LOGIN AS ADMIN' : '🔓 LOGIN AS AGENT';
+        showError('❌ Agent ID atau password salah. Coba lagi.');
+        return;
+      }
+
+      if (session.role !== currentRole) {
+        Auth.logout();
+        btn.disabled = false;
+        btnText.textContent = currentRole === 'admin' ? '🔓 LOGIN AS ADMIN' : '🔓 LOGIN AS AGENT';
+        showError(`❌ Akun ini bukan role ${currentRole.toUpperCase()}.`);
+        return;
+      }
+
+      // Success
+      btnText.innerHTML = '✅ LOGIN BERHASIL — MENGALIHKAN...';
+      setTimeout(() => {
+        window.location.href = session.role === 'admin' ? 'pages/admin.html' : 'pages/agent.html';
+      }, 600);
+    } catch (err) {
+      console.error(err);
+      btn.disabled = false;
+      btnText.textContent = currentRole === 'admin' ? '🔓 LOGIN AS ADMIN' : '🔓 LOGIN AS AGENT';
+      showError('❌ Koneksi database gagal. Periksa Firebase Config Anda.');
+    }
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function showError(msg) {
+    const el = document.getElementById('login-error');
+    el.className = 'login-error';
+    el.innerHTML = msg;
+  }
+  function clearError() {
+    const el = document.getElementById('login-error');
+    el.className = 'hidden';
+    el.innerHTML = '';
+  }
+  function togglePwd() {
+    const inp = document.getElementById('input-password');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  }
+
+  // Enter key shortcut
+  document.getElementById('input-agent-id').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('input-password').focus();
+  });
+</script>
+</body>
+</html>

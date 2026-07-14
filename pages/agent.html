@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AeroCheck — Agent Check-In</title>
+  <meta name="description" content="Agent check-in workspace simulasi sistem pasasi penerbangan Nusantara Air.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✈</text></svg>">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/agent.css">
+</head>
+<body>
+<div id="toast-container"></div>
+
+<!-- ═══ Main Agent Layout ═══ -->
+<div class="agent-layout">
+
+  <!-- ── Top Bar ── -->
+  <header class="agent-topbar">
+    <div class="topbar-brand">
+      <span class="logo-icon">✈</span>
+      <span class="logo-name">AeroCheck</span>
+    </div>
+    <div class="topbar-divider"></div>
+
+    <!-- Flight ticker -->
+    <div class="flight-ticker">
+      <div class="ticker-inner" id="ticker-inner">
+        <span class="ticker-item" style="color:var(--text-muted);font-size:0.72rem;">Memuat info penerbangan...</span>
+      </div>
+    </div>
+
+    <div class="topbar-divider"></div>
+
+    <!-- Agent info -->
+    <div class="topbar-agent">
+      <div class="agent-name-tag">
+        <div class="aname" id="tb-agent-name">—</div>
+        <div class="aid" id="tb-agent-id">—</div>
+      </div>
+      <div class="agent-avatar" id="tb-agent-avatar">?</div>
+      <button class="btn-logout-top" onclick="Auth.logout()">🚪 LOGOUT</button>
+    </div>
+
+    <div class="topbar-divider"></div>
+
+    <!-- Clock -->
+    <div class="topbar-clock">
+      <div class="clock-time" id="topbar-clock-time">--:--:--</div>
+      <div class="clock-date" id="topbar-clock-date">---</div>
+    </div>
+  </header>
+
+  <!-- ── Search Bar ── -->
+  <section class="search-bar-section">
+    <div class="search-bar-wrap">
+      <!-- Search type selector -->
+      <div class="search-type-tabs">
+        <button class="search-type-btn active" id="stype-pnr" onclick="setSearchMode('pnr')">📋 PNR</button>
+        <button class="search-type-btn" id="stype-flight" onclick="setSearchMode('flight')">✈ Flight</button>
+        <button class="search-type-btn" id="stype-name" onclick="setSearchMode('name')">👤 Nama</button>
+      </div>
+
+      <!-- Search input -->
+      <div class="search-input-group" style="position:relative;">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          id="search-input"
+          class="search-input"
+          placeholder="Masukkan Kode Booking / PNR (contoh: ABC123)"
+          autocomplete="off"
+          spellcheck="false"
+          oninput="onSearchInput()"
+          onkeydown="if(event.key==='Enter') executeSearch(event)"
+        >
+        <!-- Dropdown results -->
+        <div class="search-results-dropdown hidden" id="search-dropdown"></div>
+      </div>
+
+      <button class="btn btn-primary btn-search" onclick="executeSearch()">
+        🔍 CARI
+      </button>
+
+      <button class="btn btn-secondary btn-sm" onclick="clearWorkspace()" title="Reset workspace">
+        ✕
+      </button>
+    </div>
+  </section>
+
+  <!-- ── Workspace ── -->
+  <div class="workspace">
+
+    <!-- ── Left Panel — Info ── -->
+    <div class="left-panel">
+
+      <!-- Flight Info -->
+      <div id="flight-info-card"></div>
+
+      <!-- Passenger Info -->
+      <div id="pax-info-card"></div>
+
+      <!-- Status -->
+      <div id="status-panel"></div>
+
+      <!-- Idle / empty state -->
+      <div class="idle-state" id="left-idle-state">
+        <div class="idle-icon">🗂</div>
+        <p style="font-size:0.78rem;color:var(--text-muted);">Cari penumpang untuk memulai</p>
+      </div>
+
+    </div>
+
+    <!-- ── Right Panel — Actions ── -->
+    <div class="right-panel">
+
+      <!-- Step Header -->
+      <div class="step-header">
+        <div class="step-item" id="step-seat">
+          <div class="step-num">1</div>
+          <div class="step-label">SEAT ASSIGNMENT</div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-item" id="step-baggage">
+          <div class="step-num">2</div>
+          <div class="step-label">BAGGAGE</div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-item" id="step-issue">
+          <div class="step-num">3</div>
+          <div class="step-label">ISSUE BOARDING PASS</div>
+        </div>
+      </div>
+
+      <!-- Step Content -->
+      <div class="step-content">
+
+        <!-- Panel: Idle -->
+        <div class="step-panel active" id="panel-idle">
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;gap:1.25rem;padding:3rem;">
+            <div style="font-size:4rem;opacity:0.15;animation:idle-float 5s ease-in-out infinite;">✈</div>
+            <div>
+              <h2 style="font-size:1rem;font-weight:700;color:var(--text-secondary);margin-bottom:0.5rem;">
+                TRIESAKTI AIR — CHECK-IN SYSTEM
+              </h2>
+              <p style="font-size:0.82rem;color:var(--text-muted);line-height:1.7;" id="idle-msg">
+                Masukkan Kode Booking untuk memulai check-in.<br>
+                Gunakan search bar di atas.
+              </p>
+            </div>
+            <div style="padding:1rem 1.5rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--r-lg);text-align:left;max-width:360px;">
+              <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.12em;color:var(--text-muted);margin-bottom:0.65rem;">💡 QUICK GUIDE</div>
+              <div style="display:flex;flex-direction:column;gap:0.5rem;font-size:0.78rem;color:var(--text-secondary);">
+                <div>1️⃣ &nbsp;Minta PNR/kode booking dari penumpang</div>
+                <div>2️⃣ &nbsp;Cari di search bar, pilih penumpang</div>
+                <div>3️⃣ &nbsp;Verifikasi nama & data penerbangan</div>
+                <div>4️⃣ &nbsp;Pilih kursi di seat map interaktif</div>
+                <div>5️⃣ &nbsp;Input berat & jumlah koli bagasi</div>
+                <div>6️⃣ &nbsp;Issue & cetak boarding pass</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel: Step 1 — Seat Assignment -->
+        <div class="step-panel" id="step-panel-seat">
+          <div style="margin-bottom:1rem;">
+            <h3 style="font-size:0.95rem;font-weight:700;color:var(--text-primary);">🪑 Pilih Kursi</h3>
+            <p style="font-size:0.78rem;color:var(--text-muted);margin-top:0.25rem;">
+              Klik kursi yang tersedia di peta kabin. Kursi sesuai kelas kabin penumpang.
+            </p>
+          </div>
+          <div id="seat-selected-info" style="margin-bottom:1rem;"></div>
+          <div id="seatmap-render-area"></div>
+        </div>
+
+        <!-- Panel: Step 2 — Baggage -->
+        <div class="step-panel" id="step-panel-baggage">
+          <div class="baggage-panel">
+            <div style="margin-bottom:1rem;">
+              <h3 style="font-size:0.95rem;font-weight:700;color:var(--text-primary);">🧳 Input Bagasi</h3>
+              <p style="font-size:0.78rem;color:var(--text-muted);margin-top:0.25rem;">
+                Timbang bagasi penumpang dan masukkan data di bawah.
+              </p>
+            </div>
+
+            <!-- Scale display -->
+            <div class="baggage-scale">
+              <div class="scale-icon">⚖️</div>
+              <div>
+                <span class="scale-weight" id="baggage-weight-display">0</span>
+                <span class="scale-unit">KG</span>
+              </div>
+              <div class="scale-fba" id="baggage-fba-info">FBA: — kg</div>
+            </div>
+
+            <!-- Input form -->
+            <div class="baggage-form">
+              <div class="form-group">
+                <label class="form-label">Berat Total (kg) *</label>
+                <input
+                  type="number"
+                  id="baggage-input-weight"
+                  class="form-control mono"
+                  placeholder="0"
+                  min="0" max="999" step="0.1"
+                  oninput="updateBaggageCalc()"
+                >
+              </div>
+              <div class="form-group">
+                <label class="form-label">Jumlah Koli (pieces)</label>
+                <input
+                  type="number"
+                  id="baggage-input-pieces"
+                  class="form-control mono"
+                  placeholder="0"
+                  min="0" max="20"
+                  oninput="updateBaggageCalc()"
+                >
+              </div>
+            </div>
+
+            <!-- Status alerts -->
+            <div class="excess-alert hidden" id="excess-alert"></div>
+            <div class="fba-ok hidden" id="fba-ok-banner"></div>
+          </div>
+        </div>
+
+        <!-- Panel: Step 3 — Done / Issue -->
+        <div class="step-panel" id="step-panel-done">
+          <!-- Filled by renderDonePanel() -->
+        </div>
+
+      </div><!-- /step-content -->
+
+      <!-- Action Bar -->
+      <div class="action-bar">
+        <div class="action-bar-left">
+          <button class="btn btn-secondary hidden" id="ab-back">← Kembali</button>
+          <div id="ab-step-info" style="font-size:0.78rem;color:var(--text-muted);"></div>
+        </div>
+        <div class="action-bar-right">
+          <button class="btn btn-primary hidden" id="ab-next">Lanjut →</button>
+        </div>
+      </div>
+
+    </div><!-- /right-panel -->
+  </div><!-- /workspace -->
+
+</div><!-- /agent-layout -->
+
+<!-- ═══ Boarding Pass Overlay ═══ -->
+<div id="boarding-pass-overlay" class="hidden">
+  <div class="bp-wrapper">
+    <div class="bp-actions">
+      <button class="btn btn-secondary" onclick="BoardingPass.hide()">✕ Tutup</button>
+      <button class="btn btn-primary" onclick="BoardingPass.print()">🖨 Cetak Boarding Pass</button>
+    </div>
+    <div id="bp-content"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase-config.js"></script>
+<script src="../js/db.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/seed.js"></script>
+<script src="../js/seatmap.js"></script>
+<script src="../js/boarding.js"></script>
+<script src="../js/agent.js"></script>
+<script>
+  // ── Guard ────────────────────────────────────────────────────────────────
+  if (!Auth.requireRole('agent')) throw new Error('Unauthorized');
+
+  // ── Session info ─────────────────────────────────────────────────────────
+  const _sess = Auth.getSession();
+  document.getElementById('tb-agent-name').textContent  = _sess.name;
+  document.getElementById('tb-agent-id').textContent    = _sess.agentId + ' · AGENT';
+  document.getElementById('tb-agent-avatar').textContent = _sess.name.charAt(0).toUpperCase();
+
+  // ── Init ─────────────────────────────────────────────────────────────────
+  startClock();
+  
+  (async () => {
+    await Seed.run();
+    await buildTicker();
+  })();
+
+  // ── Keyboard shortcut: F5 to refresh ticker ───────────────────────────────
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'F5') { e.preventDefault(); buildTicker(); }
+    if (e.key === 'Escape') {
+      if (!document.getElementById('boarding-pass-overlay').classList.contains('hidden')) {
+        BoardingPass.hide();
+      }
+      hideDropdown();
+    }
+  });
+
+  // ── Close dropdown on outside click ──────────────────────────────────────
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.search-input-group')) hideDropdown();
+  });
+
+  // ── Manage left panel idle state ──────────────────────────────────────────
+  // Show/hide idle based on whether a passenger is loaded
+  const _origSetStep = setStep;
+  window.setStep = (step) => {
+    _origSetStep(step);
+    const leftIdle = document.getElementById('left-idle-state');
+    if (leftIdle) {
+      leftIdle.classList.toggle('hidden', _currentPax !== null);
+    }
+  };
+</script>
+</body>
+</html>
