@@ -129,118 +129,98 @@ const BoardingPass = (() => {
 
     let finalHtml = `
     <div class="boarding-pass" id="boarding-pass-printable">
-      <!-- Header -->
-      <div class="bp-header">
-        <div>
-          <div class="bp-airline-name">✈ TRIESAKTI AIR</div>
-          <div class="bp-airline-sub">TRIESAKTI AIR — PASSENGER SERVICE</div>
+      <div class="bp-top">
+        <div class="bp-top-left">
+          <div class="bp-airline">✈ TRIESAKTI AIR</div>
+          <div class="bp-title">BOARDING PASS</div>
         </div>
-        <div style="text-align:right;">
-          <div class="bp-type">BOARDING PASS</div>
-          <div style="font-size:0.65rem;color:rgba(255,255,255,0.4);margin-top:0.25rem;letter-spacing:0.08em;">FOR TRAINING USE ONLY</div>
+        <div class="bp-top-right">
+          <div class="bp-airline">✈ TRIESAKTI AIR</div>
         </div>
       </div>
 
-      <!-- Main body -->
-      <div class="bp-main">
-        <!-- Left side -->
-        <div class="bp-left">
-          <div class="bp-pnr-label">PASSENGER NAME</div>
-          <div class="bp-passenger-name">${paxName}</div>
-          <div style="margin-top:0.4rem;display:flex;align-items:center;gap:0.75rem;">
-            <div>
-              <div class="bp-pnr-label">BOOKING REFERENCE</div>
-              <div class="bp-pnr-val">${passenger.pnr}</div>
-            </div>
-            ${(passenger.ssr||[]).length ? `<div>${ssrTags}</div>` : ''}
+      <div class="bp-body">
+        <div class="bp-main-stub">
+          <div class="bp-route-hero">
+            <div class="bp-route-code">${flight.origin}</div>
+            <div class="bp-route-arrow">┈┈ ✈ ┈┈</div>
+            <div class="bp-route-code">${flight.destination}</div>
           </div>
-
-          <!-- Route -->
-          <div class="bp-route-row">
-            <div>
-              <div class="bp-iata">${flight.origin}</div>
-              <div class="bp-city">${flight.originCity || '—'}</div>
-            </div>
-            <div class="bp-flight-arrow">
-              <div class="bp-fa-fn">✈ ${flight.flightNumber}</div>
-              <div class="bp-fa-line"></div>
-              <div style="font-size:0.6rem;color:#8090a8;">${flight.aircraft}</div>
-            </div>
-            <div style="text-align:right;">
-              <div class="bp-iata">${flight.destination}</div>
-              <div class="bp-city">${flight.destinationCity || '—'}</div>
-            </div>
+          <div class="bp-route-city">
+            <span>From ${flight.originCity || '—'}</span>
+            <span>To ${flight.destinationCity || '—'}</span>
           </div>
-
-          <!-- Details grid -->
-          <div class="bp-details-grid">
-            <div class="bp-detail-item">
-              <div class="bd-label">DATE</div>
-              <div class="bd-val">${flightDate}</div>
+          
+          <div class="bp-grid-main">
+            <div class="bp-col">
+              <div class="bp-label">Passenger name</div>
+              <div class="bp-val">${paxName}</div>
+              <div class="bp-space"></div>
+              <div class="bp-label">Date</div>
+              <div class="bp-val">${flightDate}</div>
+              <div class="bp-space"></div>
+              <div class="bp-label">Class</div>
+              <div class="bp-val">${cabinFull}</div>
             </div>
-            <div class="bp-detail-item">
-              <div class="bd-label">STD</div>
-              <div class="bd-val">${stdTime}</div>
+            
+            <div class="bp-col">
+              <div class="bp-label">Flight number</div>
+              <div class="bp-val" style="font-size:1.2rem">${flight.flightNumber}</div>
+              <div class="bp-space"></div>
+              <div class="bp-label">Boarding time</div>
+              <div class="bp-val" style="font-size:1.8rem; letter-spacing: 0.05em;">${boardingTime}</div>
+              <div class="bp-space"></div>
+              <div class="bp-label">Seat</div>
+              <div class="bp-val" style="font-size:1.5rem">${seatNum}</div>
             </div>
-            <div class="bp-detail-item">
-              <div class="bd-label">BOARDING</div>
-              <div class="bd-val">${boardingTime}</div>
-            </div>
-            <div class="bp-detail-item">
-              <div class="bd-label">GATE</div>
-              <div class="bd-val">${flight.gate || '—'}</div>
-            </div>
-            <div class="bp-detail-item">
-              <div class="bd-label">TERMINAL</div>
-              <div class="bd-val">${flight.terminal || '—'}</div>
-            </div>
-            <div class="bp-detail-item">
-              <div class="bd-label">SEQUENCE</div>
-              <div class="bd-val">${seqNum}</div>
+            
+            <div class="bp-col">
+              <div class="bp-label">Terminal</div>
+              <div class="bp-val" style="font-size:1.2rem">${flight.terminal || '—'}</div>
+              <div class="bp-space"></div>
+              <div class="bp-label">Gate</div>
+              <div class="bp-val" style="font-size:1.5rem">${flight.gate || '—'}</div>
+              <div class="bp-space"></div>
+              ${passenger.excessBaggage > 0 ? `<div class="bp-label" style="color:#d32f2f">Excess Baggage</div><div class="bp-val" style="color:#d32f2f">${passenger.excessBaggage} kg</div>` : ''}
+              ${(passenger.ssr||[]).length ? `<div class="bp-label">SSR</div><div class="bp-val" style="font-size:0.75rem">${passenger.ssr.join(', ')}</div>` : ''}
+              <div class="bp-label">SEQ</div>
+              <div class="bp-val">${seqNum}</div>
             </div>
           </div>
-
           ${excessInfo}
         </div>
 
-        <!-- Right side -->
-        <div class="bp-right">
-          <div class="bp-seat-display">
-            <div class="bp-seat-label">SEAT</div>
-            <div class="bp-seat-num">${seatNum}</div>
-            <div class="bp-seat-class">${cabinFull} · ${cabinCode}</div>
+        <div class="bp-tear-stub">
+          <div class="bp-label">Passenger name</div>
+          <div class="bp-val">${paxName}</div>
+          <div class="bp-space"></div>
+          
+          <div class="bp-label">Date</div>
+          <div class="bp-val">${flightDate}</div>
+          <div class="bp-space"></div>
+          
+          <div class="bp-label">From</div>
+          <div class="bp-val">${flight.originCity || '—'} / ${flight.origin}<br><span style="font-size:0.8rem">${stdTime}</span></div>
+          <div class="bp-space"></div>
+          
+          <div class="bp-label">To</div>
+          <div class="bp-val">${flight.destinationCity || '—'} / ${flight.destination}<br><span style="font-size:0.8rem">--:--</span></div>
+          <div class="bp-space"></div>
+          
+          <div class="bp-flex-row">
+            <div>
+              <div class="bp-label">Seat</div>
+              <div class="bp-val" style="font-size:1.2rem">${seatNum}</div>
+            </div>
+            <div>
+              <div class="bp-label">Gate</div>
+              <div class="bp-val" style="font-size:1.2rem">${flight.gate || '—'}</div>
+            </div>
           </div>
-
-          <div class="bp-mini-details">
-            <div class="bp-mini-item">
-              <span class="bp-mini-label">BAGGAGE</span>
-              <span class="bp-mini-val">${passenger.baggageWeight > 0 ? passenger.baggageWeight + ' KG' : '—'}</span>
-            </div>
-            <div class="bp-mini-item">
-              <span class="bp-mini-label">PIECES</span>
-              <span class="bp-mini-val">${passenger.baggageItems > 0 ? passenger.baggageItems : '—'}</span>
-            </div>
-            <div class="bp-mini-item">
-              <span class="bp-mini-label">FBA</span>
-              <span class="bp-mini-val">${passenger.fba} KG</span>
-            </div>
+          <div style="margin-top:1.5rem; text-align:center;">
+             <div class="bp-barcode">${barcodeHtml}</div>
           </div>
-
-          <!-- QR Code -->
-          <div class="bp-qr">${qrHtml}</div>
         </div>
-      </div>
-
-      <!-- Barcode -->
-      <div class="bp-barcode-section">
-        <div class="bp-barcode">${barcodeHtml}</div>
-        <div class="bp-barcode-num">${barcodeNum}</div>
-      </div>
-
-      <!-- Footer -->
-      <div class="bp-footer">
-        <div class="bp-footer-text">TRIESAKTI AIR — ${flight.flightNumber} — ${flightDate} — VALID FOR ONE JOURNEY ONLY</div>
-        <div class="bp-footer-sim">⚠ SIMULATOR — NOT FOR ACTUAL TRAVEL</div>
       </div>
     </div>`;
 

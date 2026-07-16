@@ -890,241 +890,168 @@
 .boarding-pass {
   background: #fff;
   color: #1a1a2e;
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 24px 80px rgba(0,0,0,0.8);
-  font-family: 'Outfit', sans-serif;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  font-family: 'Inter', 'Outfit', sans-serif;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 800px;
+}
+
+.bp-top {
+  display: flex;
+  height: 60px;
+  background: #ff8c00;
+  color: #fff;
+  align-items: center;
+}
+
+.bp-top-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  border-right: 2px dashed rgba(255, 255, 255, 0.5);
+  height: 100%;
+}
+
+.bp-top-right {
+  width: 250px;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.bp-airline {
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.bp-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.bp-body {
+  display: flex;
+  background: #fff;
   position: relative;
 }
 
-.bp-header {
-  background: linear-gradient(135deg, #0f0f2d 0%, #1a1a4e 50%, #0d2060 100%);
-  color: #fff;
-  padding: 1.1rem 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.bp-airline-name {
-  font-size: 1rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  color: #fff;
-}
-.bp-airline-sub {
-  font-size: 0.6rem;
-  letter-spacing: 0.15em;
-  color: rgba(255,255,255,0.5);
-  margin-top: 0.1rem;
-}
-.bp-type {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.25em;
-  color: rgba(255,255,255,0.5);
-}
-
-.bp-main {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0;
-}
-
-.bp-left {
-  padding: 1.25rem 1.5rem;
-  border-right: 2px dashed #dde0e8;
-}
-
-.bp-passenger-name {
-  font-size: 1.2rem;
-  font-weight: 800;
-  color: #0a0e2a;
-  letter-spacing: 0.03em;
-  margin-bottom: 0.15rem;
-}
-.bp-pnr-label {
-  font-size: 0.6rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #8090a8;
-  margin-bottom: 0.1rem;
-}
-.bp-pnr-val {
-  font-family: var(--font-mono), monospace;
-  font-size: 1rem;
-  font-weight: 700;
-  color: #1a4099;
-  letter-spacing: 0.15em;
-}
-
-.bp-route-row {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin: 1rem 0;
-  padding: 0.85rem 1rem;
-  background: #f4f6fb;
-  border-radius: 8px;
-}
-.bp-iata {
-  font-family: var(--font-mono), monospace;
-  font-size: 1.9rem;
-  font-weight: 800;
-  color: #0a0e2a;
-  line-height: 1;
-}
-.bp-city {
-  font-size: 0.65rem;
-  color: #8090a8;
-  margin-top: 0.1rem;
-}
-.bp-flight-arrow {
+.bp-main-stub {
   flex: 1;
+  padding: 2rem;
+  border-right: 2px dashed #ddd;
+  position: relative;
+}
+
+/* Semi-circles for the tear-off line */
+.bp-main-stub::after, .bp-main-stub::before {
+  content: '';
+  position: absolute;
+  right: -10px;
+  width: 20px;
+  height: 20px;
+  background: rgba(6,10,20,0.92); /* Matches overlay background */
+  border-radius: 50%;
+  z-index: 10;
+}
+@media print {
+  .bp-main-stub::after, .bp-main-stub::before {
+    background: #fff; /* or transparent */
+  }
+}
+.bp-main-stub::before { top: -10px; }
+.bp-main-stub::after { bottom: -10px; }
+
+.bp-route-hero {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 3.5rem;
+  font-family: var(--font-mono), monospace;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+  color: #000;
+}
+
+.bp-route-arrow {
+  font-size: 1.5rem;
+  color: #000;
+  letter-spacing: 0;
+  display: flex;
+  align-items: center;
+}
+
+.bp-route-city {
+  display: flex;
+  justify-content: space-between;
+  width: 380px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #333;
+  margin-bottom: 2rem;
+}
+
+.bp-grid-main {
+  display: grid;
+  grid-template-columns: 2fr 1.2fr 1fr;
+  gap: 1.5rem;
+}
+
+.bp-col {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 2px;
-}
-.bp-fa-line {
-  width: 100%;
-  height: 1.5px;
-  background: linear-gradient(90deg, #cbd0dd, #3a7bd5, #cbd0dd);
-}
-.bp-fa-fn {
-  font-family: var(--font-mono), monospace;
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: #3a7bd5;
-  letter-spacing: 0.08em;
 }
 
-.bp-details-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-}
-.bp-detail-item .bd-label {
-  font-size: 0.6rem;
-  letter-spacing: 0.14em;
+.bp-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #111;
   text-transform: uppercase;
-  color: #8090a8;
   margin-bottom: 0.2rem;
 }
-.bp-detail-item .bd-val {
-  font-family: var(--font-mono), monospace;
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #1a1a2e;
-}
 
-.bp-right {
-  width: 160px;
-  padding: 1.25rem 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.85rem;
-  background: #f8faff;
-}
-
-.bp-seat-display {
-  text-align: center;
-}
-.bp-seat-label {
-  font-size: 0.55rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #8090a8;
-  margin-bottom: 0.25rem;
-}
-.bp-seat-num {
-  font-family: var(--font-mono), monospace;
-  font-size: 2.2rem;
+.bp-val {
+  font-size: 0.95rem;
   font-weight: 800;
-  color: #1a4099;
-  line-height: 1;
-}
-.bp-seat-class {
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  color: #8090a8;
-  margin-top: 0.15rem;
+  color: #000;
+  text-transform: uppercase;
 }
 
-.bp-mini-details {
-  width: 100%;
+.bp-space {
+  height: 1.2rem;
+}
+
+.bp-tear-stub {
+  width: 250px;
+  padding: 2rem 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
 }
-.bp-mini-item {
+
+.bp-flex-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  font-size: 0.7rem;
 }
-.bp-mini-label { color: #8090a8; }
-.bp-mini-val   { font-family: var(--font-mono), monospace; font-weight: 700; color: #1a1a2e; }
 
-/* QR code (fake) */
-.bp-qr {
-  width: 72px; height: 72px;
-  background: #1a1a2e;
-  border-radius: 6px;
-  padding: 6px;
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 1px;
-}
-.bp-qr-cell { border-radius: 1px; }
-.bp-qr-cell.b { background: #fff; }
-.bp-qr-cell.w { background: transparent; }
-
-/* Barcode */
-.bp-barcode-section {
-  padding: 0.85rem 1.5rem;
-  background: #fff;
-  border-top: 2px dashed #dde0e8;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.35rem;
-}
 .bp-barcode {
-  display: flex;
+  display: inline-flex;
   gap: 1px;
-  height: 42px;
+  height: 30px;
   align-items: flex-end;
 }
 .bc-bar {
   background: #1a1a2e;
   border-radius: 1px 1px 0 0;
-}
-.bp-barcode-num {
-  font-family: var(--font-mono), monospace;
-  font-size: 0.62rem;
-  letter-spacing: 0.12em;
-  color: #8090a8;
-}
-
-.bp-footer {
-  padding: 0.6rem 1.5rem;
-  background: linear-gradient(135deg, #0f0f2d, #1a1a4e);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.bp-footer-text {
-  font-size: 0.6rem;
-  color: rgba(255,255,255,0.4);
-  letter-spacing: 0.12em;
-}
-.bp-footer-sim {
-  font-size: 0.6rem;
-  color: rgba(255,179,0,0.6);
-  letter-spacing: 0.1em;
-  font-weight: 600;
 }
 
 /* ── Print styles ─────────────────────────────────────────────── */
