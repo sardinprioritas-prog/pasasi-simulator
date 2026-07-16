@@ -479,7 +479,7 @@ function updateBaggageCalc() {
   weight = Math.round(weight * 10) / 10;
   
   const fba     = _currentPax ? _currentPax.fba : 20;
-  const excess  = Math.max(0, weight - fba);
+  const excess  = Math.round(Math.max(0, weight - fba) * 10) / 10;
 
   // Animated weight display
   document.getElementById('baggage-weight-display').textContent = weight;
@@ -530,7 +530,7 @@ async function confirmBaggage() {
   if (pieces > 0 && weight <= 0) { toast('Masukkan berat untuk setiap koli bagasi.', 'warning'); return; }
 
   const fba    = _currentPax.fba;
-  const excess = Math.max(0, weight - fba);
+  const excess = Math.round(Math.max(0, weight - fba) * 10) / 10;
 
   _currentPax.baggageItems   = pieces;
   _currentPax.baggageWeight  = weight;
@@ -575,15 +575,20 @@ function renderDonePanel() {
       ${f.origin} → ${f.destination} · ${formatTime(f.std)} · Gate ${f.gate}
     </p>
     ${p.excessBaggage > 0 ? `
-    <div class="excess-alert" style="text-align:left;margin-bottom:1.25rem;">
-      <span class="ea-icon">⚠️</span>
+    <div class="excess-alert" style="text-align:left;margin-bottom:1.25rem; ${p.excessPaid ? 'background:rgba(0,230,118,0.1); border-color:rgba(0,230,118,0.3); color:var(--green);' : ''}">
+      <span class="ea-icon">${p.excessPaid ? '✅' : '⚠️'}</span>
       <div>
-        <div class="ea-title">EXCESS BAGGAGE — TAGIH SEBELUM ISSUE</div>
-        <div class="ea-body">Kelebihan: ${p.excessBaggage} kg · Fee: <strong>Rp ${(p.excessBaggage * BoardingPass.EXCESS_RATE).toLocaleString('id-ID')}</strong></div>
+        <div class="ea-title" style="${p.excessPaid ? 'color:var(--green);' : ''}">${p.excessPaid ? 'EXCESS BAGGAGE — PAID' : 'EXCESS BAGGAGE — TAGIH SEBELUM ISSUE'}</div>
+        <div class="ea-body" style="${p.excessPaid ? 'color:var(--green);' : ''}">Kelebihan: ${p.excessBaggage} kg · Fee: <strong>Rp ${(p.excessBaggage * BoardingPass.EXCESS_RATE).toLocaleString('id-ID')}</strong></div>
       </div>
     </div>` : ''}
     <div style="display:flex;flex-direction:column;gap:0.75rem;align-items:center;">
-      <button class="btn-issue" onclick="issueBoardingPass()" id="btn-issue-final">
+      ${(p.excessBaggage > 0 && !p.excessPaid && !p.boardingPassIssued) ? `
+      <button class="btn btn-primary" onclick="confirmPayment()" style="background:var(--cyan); border-color:var(--cyan); color:#000;">
+        💳 Konfirmasi Pembayaran
+      </button>
+      ` : ''}
+      <button class="btn-issue" onclick="issueBoardingPass()" id="btn-issue-final" ${(p.excessBaggage > 0 && !p.excessPaid) ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>
         🎫 ISSUE BOARDING PASS
       </button>
       ${p.boardingPassIssued ? `
@@ -600,6 +605,13 @@ function renderDonePanel() {
       ✅ Boarding pass sudah diterbitkan. Status: CHECKED IN
     </div>` : ''}
   </div>`;
+}
+
+async function confirmPayment() {
+  _currentPax.excessPaid = true;
+  await DB.savePassenger(_currentPax);
+  toast('Pembayaran excess baggage berhasil dikonfirmasi.', 'success');
+  renderDonePanel();
 }
 
 /* ── Issue Boarding Pass ─────────────────────────────────────────────────────── */

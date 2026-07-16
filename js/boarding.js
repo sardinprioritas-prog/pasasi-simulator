@@ -127,7 +127,7 @@ const BoardingPass = (() => {
     // Barcode number string
     const barcodeNum = `${passenger.pnr} ${flight.flightNumber.replace('-','')} ${seatNum.padEnd(4)} ${seqNum} ${flight.origin}${flight.destination}`;
 
-    return `
+    let finalHtml = `
     <div class="boarding-pass" id="boarding-pass-printable">
       <!-- Header -->
       <div class="bp-header">
@@ -243,6 +243,66 @@ const BoardingPass = (() => {
         <div class="bp-footer-sim">⚠ SIMULATOR — NOT FOR ACTUAL TRAVEL</div>
       </div>
     </div>`;
+
+    if (passenger.excessBaggage > 0 && passenger.excessPaid) {
+      const fee = (passenger.excessBaggage * EXCESS_RATE).toLocaleString('id-ID');
+      const dateObj = new Date();
+      const printDate = dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
+      const printTime = dateObj.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      
+      finalHtml += `
+      <div class="excess-receipt" style="width:100%; max-width:800px; margin: 2rem auto; border:2px dashed #8090a8; padding:1.5rem; background:#fff; color:#1a1a2e; font-family:monospace; page-break-inside:avoid; position:relative; border-radius:8px; box-sizing:border-box;">
+        <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%) rotate(-15deg); font-size:6rem; color:rgba(0,230,118,0.08); font-weight:900; pointer-events:none; z-index:1; border:8px solid rgba(0,230,118,0.08); border-radius:12px; padding:0 20px;">PAID</div>
+        <div style="text-align:center; margin-bottom:1.5rem; position:relative; z-index:2;">
+          <div style="font-size:1.5rem; font-weight:900; letter-spacing:0.05em;">✈ TRIESAKTI AIR</div>
+          <div style="font-size:1rem; font-weight:700; color:#8090a8; margin-top:0.25rem;">EXCESS BAGGAGE RECEIPT</div>
+        </div>
+        
+        <div style="display:flex; justify-content:space-between; margin-bottom:1rem; position:relative; z-index:2;">
+          <div>
+            <div style="font-size:0.75rem; color:#8090a8;">PASSENGER NAME</div>
+            <div style="font-size:1.1rem; font-weight:700;">${paxName}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:0.75rem; color:#8090a8;">PNR</div>
+            <div style="font-size:1.2rem; font-weight:900; color:#1a4099;">${passenger.pnr}</div>
+          </div>
+        </div>
+        
+        <div style="display:flex; justify-content:space-between; margin-bottom:1rem; position:relative; z-index:2;">
+          <div>
+            <div style="font-size:0.75rem; color:#8090a8;">FLIGHT</div>
+            <div style="font-size:1rem; font-weight:700;">${flight.flightNumber}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:0.75rem; color:#8090a8;">DATE / TIME</div>
+            <div style="font-size:1rem; font-weight:700;">${printDate} ${printTime}</div>
+          </div>
+        </div>
+        
+        <div style="border-top:1px dashed #ccc; border-bottom:1px dashed #ccc; padding:1rem 0; margin-bottom:1rem; position:relative; z-index:2;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.9rem;">
+            <div>FREE BAGGAGE ALLOWANCE</div>
+            <div style="font-weight:700;">${passenger.fba} KG</div>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.9rem;">
+            <div>ACTUAL WEIGHT (${passenger.baggageItems} PIECE${passenger.baggageItems > 1 ? 'S' : ''})</div>
+            <div style="font-weight:700;">${passenger.baggageWeight} KG</div>
+          </div>
+          <div style="display:flex; justify-content:space-between; color:#d32f2f; margin-top:0.75rem; font-size:1rem;">
+            <div>EXCESS WEIGHT</div>
+            <div style="font-weight:900;">${passenger.excessBaggage} KG</div>
+          </div>
+        </div>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; position:relative; z-index:2;">
+          <div style="font-size:1.2rem; font-weight:900;">TOTAL PAID</div>
+          <div style="font-size:1.5rem; font-weight:900; color:#00e676;">IDR ${fee}</div>
+        </div>
+      </div>`;
+    }
+    
+    return finalHtml;
   }
 
   // ── Public API ────────────────────────────────────────────────────────────
