@@ -366,6 +366,9 @@ select.form-control {
 .ssr-CHLD  { background: rgba(199,125,255,0.12);color: #c77dff; border: 1px solid rgba(199,125,255,0.3); }
 .ssr-FRAG  { background: rgba(255,179,0,0.15);  color: #ffb300; border: 1px solid rgba(255,179,0,0.3); }
 .ssr-BULK  { background: rgba(255,179,0,0.15);  color: #ffb300; border: 1px solid rgba(255,179,0,0.3); }
+.ssr-TAHN  { background: rgba(255,77,109,0.12); color: #ff4d6d; border: 1px solid rgba(255,77,109,0.3); }
+.ssr-VVIP  { background: rgba(199,125,255,0.12);color: #c77dff; border: 1px solid rgba(199,125,255,0.3); }
+.ssr-VCIP  { background: rgba(199,125,255,0.12);color: #c77dff; border: 1px solid rgba(199,125,255,0.3); }
 
 /* ── Toast Notifications ─────────────────────────────────────────────────── */
 #toast-container {
