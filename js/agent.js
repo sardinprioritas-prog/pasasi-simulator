@@ -429,15 +429,55 @@ async function confirmSeat() {
 function renderBaggagePanel() {
   const p = _currentPax;
   document.getElementById('baggage-weight-display').textContent = p.baggageWeight || 0;
-  document.getElementById('baggage-input-weight').value  = p.baggageWeight || '';
   document.getElementById('baggage-input-pieces').value  = p.baggageItems  || '';
   document.getElementById('baggage-fba-info').textContent = `FBA: ${p.fba} kg`;
+  generateBaggageItemInputs(p.baggageDetails);
+  updateBaggageCalc();
+}
+
+function generateBaggageItemInputs(existingDetails = null) {
+  const pieces = parseInt(document.getElementById('baggage-input-pieces').value) || 0;
+  const container = document.getElementById('baggage-items-container');
+  
+  // Clear if pieces is 0
+  if (pieces <= 0) {
+    container.innerHTML = '';
+    updateBaggageCalc();
+    return;
+  }
+
+  // Preserve existing user inputs if just adding/removing pieces
+  let currentVals = [];
+  if (existingDetails) {
+    currentVals = existingDetails;
+  } else {
+    document.querySelectorAll('.baggage-koli-input').forEach(inp => currentVals.push(inp.value));
+  }
+
+  let html = '';
+  for (let i = 1; i <= pieces; i++) {
+    const val = currentVals[i-1] || '';
+    html += `
+      <div class="form-group" style="margin-bottom: 0;">
+        <label class="form-label">Koli ${i} (kg)</label>
+        <input type="number" class="form-control mono baggage-koli-input" min="0" max="999" step="0.1" value="${val}" oninput="updateBaggageCalc()" placeholder="0.0">
+      </div>
+    `;
+  }
+  container.innerHTML = html;
   updateBaggageCalc();
 }
 
 function updateBaggageCalc() {
-  const weight  = parseFloat(document.getElementById('baggage-input-weight').value) || 0;
-  const pieces  = parseInt(document.getElementById('baggage-input-pieces').value)   || 0;
+  const pieces = parseInt(document.getElementById('baggage-input-pieces').value) || 0;
+  
+  let weight = 0;
+  document.querySelectorAll('.baggage-koli-input').forEach(inp => {
+    weight += parseFloat(inp.value) || 0;
+  });
+  
+  weight = Math.round(weight * 10) / 10;
+  
   const fba     = _currentPax ? _currentPax.fba : 20;
   const excess  = Math.max(0, weight - fba);
 
@@ -476,16 +516,25 @@ function updateBaggageCalc() {
 }
 
 async function confirmBaggage() {
-  const weight = parseFloat(document.getElementById('baggage-input-weight').value) || 0;
   const pieces = parseInt(document.getElementById('baggage-input-pieces').value)   || 0;
+  let weight = 0;
+  let details = [];
+  
+  document.querySelectorAll('.baggage-koli-input').forEach(inp => {
+    const w = parseFloat(inp.value) || 0;
+    weight += w;
+    details.push(w);
+  });
+  weight = Math.round(weight * 10) / 10;
 
-  if (pieces > 0 && weight <= 0) { toast('Masukkan berat total bagasi.', 'warning'); return; }
+  if (pieces > 0 && weight <= 0) { toast('Masukkan berat untuk setiap koli bagasi.', 'warning'); return; }
 
   const fba    = _currentPax.fba;
   const excess = Math.max(0, weight - fba);
 
   _currentPax.baggageItems   = pieces;
   _currentPax.baggageWeight  = weight;
+  _currentPax.baggageDetails = details;
   _currentPax.excessBaggage  = excess;
   await DB.savePassenger(_currentPax);
 

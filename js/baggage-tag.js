@@ -23,7 +23,7 @@ const BaggageTag = (() => {
   }
 
   // ── Generate the Baggage Tag HTML ─────────────────────────────────────────
-  function generateHTML(passenger, flight, itemIndex, totalItems) {
+  function generateHTML(passenger, flight, itemIndex, totalItems, weight) {
     const paxName  = `${passenger.title} ${passenger.lastName}/${passenger.firstName}`;
     
     let dateStr = '—';
@@ -78,6 +78,10 @@ const BaggageTag = (() => {
           <div style="font-size: 0.65rem; color: #8090a8; letter-spacing: 0.1em;">PNR</div>
           <div style="font-weight: 800; font-size: 1.1rem; color: #1a4099;">${passenger.pnr}</div>
         </div>
+        <div style="text-align: center;">
+          <div style="font-size: 0.65rem; color: #8090a8; letter-spacing: 0.1em;">WEIGHT</div>
+          <div style="font-weight: 800; font-size: 1.1rem;">${weight ? weight + ' KG' : '—'}</div>
+        </div>
         <div style="text-align: right;">
           <div style="font-size: 0.65rem; color: #8090a8; letter-spacing: 0.1em;">ITEM</div>
           <div style="font-weight: 800; font-size: 1.1rem;">${itemIndex} OF ${totalItems}</div>
@@ -106,7 +110,8 @@ const BaggageTag = (() => {
     
     let html = '<div style="display: flex; flex-direction: column; gap: 20px; overflow-y: auto; max-height: calc(100vh - 120px); padding: 20px;">';
     for (let i = 1; i <= passenger.baggageItems; i++) {
-      html += generateHTML(passenger, flight, i, passenger.baggageItems);
+      const weight = (passenger.baggageDetails && passenger.baggageDetails[i-1]) ? passenger.baggageDetails[i-1] : null;
+      html += generateHTML(passenger, flight, i, passenger.baggageItems, weight);
     }
     html += '</div>';
     
